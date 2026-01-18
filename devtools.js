@@ -3,6 +3,8 @@
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
 console.log('[rep+] ===== DevTools script (devtools.js) LOADED =====');
+console.log('[rep+] browser:', typeof browser !== 'undefined' ? browser : 'undefined');
+console.log('[rep+] chrome:', typeof chrome !== 'undefined' ? chrome : 'undefined');
 console.log('[rep+] browserAPI:', typeof browserAPI !== 'undefined' ? browserAPI : 'UNDEFINED');
 console.log('[rep+] browserAPI.devtools:', browserAPI?.devtools);
 

@@ -19,15 +19,37 @@
 
 <body>
     <script>
-        // Immediate alert to test if panel loads
+        // CRITICAL: This will show up in Browser Toolbox Console (Ctrl+Shift+Alt+I)
+        // NOT in the regular DevTools console!
+        console.log('========== REP+ PANEL HTML LOADED ==========');
         console.log('[rep+] BODY SCRIPT EXECUTED - Panel HTML loaded!');
-        if (typeof browser !== 'undefined') {
-            console.log('[rep+] browser object:', browser);
-        } else if (typeof chrome !== 'undefined') {
-            console.log('[rep+] chrome object:', chrome);
+        
+        // Test if browser API is available
+        const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+        console.log('[rep+] browserAPI:', browserAPI ? 'FOUND' : 'NOT FOUND');
+        
+        if (browserAPI && browserAPI.devtools) {
+            console.log('[rep+] devtools API:', browserAPI.devtools ? 'AVAILABLE' : 'NOT AVAILABLE');
+            if (browserAPI.devtools.network) {
+                console.log('[rep+] devtools.network API:', 'AVAILABLE');
+                console.log('[rep+] IMPORTANT: Make sure Network panel was opened first!');
+            } else {
+                console.error('[rep+] ERROR: devtools.network NOT available!');
+                console.error('[rep+] ACTION REQUIRED: Open Network panel in DevTools first!');
+            }
         } else {
-            console.error('[rep+] ERROR: No browser/chrome object found!');
+            console.error('[rep+] ERROR: devtools API not available!');
         }
+        
+        // Also log to window for debugging
+        window.repPlusDebug = {
+            loaded: true,
+            timestamp: Date.now(),
+            browserAPI: !!browserAPI,
+            devtools: !!(browserAPI && browserAPI.devtools),
+            network: !!(browserAPI && browserAPI.devtools && browserAPI.devtools.network)
+        };
+        console.log('[rep+] Debug info:', window.repPlusDebug);
     </script>
     <!-- Promotional Banner -->
     <div id="promo-banner" class="promo-banner">
@@ -941,7 +963,39 @@
     <script src="lib/marked.min.js"></script>
     <script src="lib/diff.min.js"></script>
     <script src="lib/js-yaml.min.js"></script>
-    <script type="module" src="js/main.js"></script>
+    <!-- Simple test script first -->
+    <script src="js/network/test-simple.js"></script>
+    <script>
+        // Immediate test to see if scripts load
+        console.log('[rep+] panel.html: Scripts section reached');
+        console.log('[rep+] browser:', typeof browser !== 'undefined' ? browser : 'undefined');
+        console.log('[rep+] chrome:', typeof chrome !== 'undefined' ? chrome : 'undefined');
+        
+        // Test network API availability directly
+        const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+        if (browserAPI && browserAPI.devtools) {
+            console.log('[rep+] devtools API available:', browserAPI.devtools);
+            if (browserAPI.devtools.network) {
+                console.log('[rep+] devtools.network API available!');
+                console.log('[rep+] onRequestFinished:', typeof browserAPI.devtools.network.onRequestFinished);
+            } else {
+                console.error('[rep+] devtools.network NOT available');
+                console.error('[rep+] Make sure Network panel was opened first!');
+            }
+        } else {
+            console.error('[rep+] devtools API NOT available!');
+        }
+        
+        // Try to load main.js as a module
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = 'js/main.js';
+        script.onload = () => console.log('[rep+] main.js module loaded successfully');
+        script.onerror = (e) => {
+            console.error('[rep+] ERROR loading main.js module:', e);
+        };
+        document.head.appendChild(script);
+    </script>
 </body>
 
 </html>
