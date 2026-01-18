@@ -2,8 +2,26 @@
 <html>
 <head>
   <title>Repeater DevTools</title>
+  <script>
+    // Immediate test - this should ALWAYS run
+    console.log('========== devtools.html LOADED ==========');
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('browser:', typeof browser !== 'undefined' ? 'EXISTS' : 'NOT FOUND');
+    console.log('chrome:', typeof chrome !== 'undefined' ? 'EXISTS' : 'NOT FOUND');
+    
+    // Alert to confirm script execution (will show popup)
+    // Comment this out after confirming it works
+    // alert('devtools.html script executed! Check Browser Toolbox Console.');
+  </script>
   <script src="devtools.js"></script>
+  <script>
+    // After devtools.js loads
+    console.log('[rep+] devtools.html: All scripts loaded');
+  </script>
 </head>
 <body>
+  <script>
+    console.log('[rep+] devtools.html: Body script executed');
+  </script>
 </body>
 </html>

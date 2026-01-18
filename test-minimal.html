@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimal Test Panel</title>
+</head>
+<body>
+    <h1>Rep+ Test Panel</h1>
+    <p>If you see this, the panel loaded!</p>
+    <script>
+        // This should ALWAYS execute if panel loads
+        console.log('========== MINIMAL TEST PANEL LOADED ==========');
+        console.log('Timestamp:', new Date().toISOString());
+        console.log('browser:', typeof browser !== 'undefined' ? 'EXISTS' : 'NOT FOUND');
+        console.log('chrome:', typeof chrome !== 'undefined' ? 'EXISTS' : 'NOT FOUND');
+        
+        // Try to access devtools API
+        const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
+        if (browserAPI && browserAPI.devtools) {
+            console.log('devtools API: AVAILABLE');
+            if (browserAPI.devtools.network) {
+                console.log('devtools.network: AVAILABLE');
+                
+                // Try to add listener
+                try {
+                    browserAPI.devtools.network.onRequestFinished.addListener(function(request) {
+                        console.log('MINIMAL TEST: Request captured!', request.request.url);
+                    });
+                    console.log('MINIMAL TEST: Listener added successfully');
+                } catch (e) {
+                    console.error('MINIMAL TEST: Error adding listener:', e);
+                }
+            } else {
+                console.error('devtools.network: NOT AVAILABLE');
+                console.error('ACTION: Open Network panel in DevTools first!');
+            }
+        } else {
+            console.error('devtools API: NOT AVAILABLE');
+        }
+        
+        // Alert to confirm script ran
+        setTimeout(() => {
+            console.log('MINIMAL TEST: Script execution complete');
+        }, 100);
+    </script>
+</body>
+</html>
