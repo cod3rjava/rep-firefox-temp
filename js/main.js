@@ -30,6 +30,8 @@ import { setupViewTabs } from './ui/view-tabs.js';
 import { setupRawRequestEditor, initLayoutToggle, initPreviewControls } from './ui/request-editor.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('[rep+] Panel DOMContentLoaded - initializing...');
+    
     // Initialize UI Elements
     initUI();
 
@@ -83,7 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const index = actions.request.add(request);
     };
 
+    console.log('[rep+] Setting up network listener from main.js...');
     setupNetworkListener((request) => {
+        console.log('[rep+] Processing captured request:', request.request?.url);
         if (state.blockRequests) {
             const hasActiveList = state.requests.length > 0;
             const hasQueued = state.blockedQueue.length > 0;
@@ -99,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         processCapturedRequest(request);
     });
+    console.log('[rep+] Network listener setup complete');
 
     // Setup UI Components
     setupResizeHandle();

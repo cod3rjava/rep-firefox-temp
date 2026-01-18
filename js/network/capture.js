@@ -3,22 +3,42 @@
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
 export function setupNetworkListener(onRequestCaptured) {
+    console.log('[rep+] Setting up network listener...');
+    
+    // Check if devtools.network API is available
+    if (!browserAPI.devtools || !browserAPI.devtools.network) {
+        console.error('[rep+] ERROR: browser.devtools.network API is not available!');
+        console.error('[rep+] Make sure you opened DevTools and activated the Network panel at least once.');
+        return;
+    }
+
+    if (!browserAPI.devtools.network.onRequestFinished) {
+        console.error('[rep+] ERROR: onRequestFinished is not available!');
+        return;
+    }
+
     // Get the current page URL once at setup
     let currentPageUrl = '';
     if (browserAPI.devtools && browserAPI.devtools.inspectedWindow) {
         browserAPI.devtools.inspectedWindow.eval('window.location.href', (result, isException) => {
             if (!isException && result) {
                 currentPageUrl = result;
+                console.log('[rep+] Current page URL:', currentPageUrl);
             }
         });
     }
 
     // Update page URL when navigation occurs
-    browserAPI.devtools.network.onNavigated.addListener((url) => {
-        currentPageUrl = url;
-    });
+    if (browserAPI.devtools.network.onNavigated) {
+        browserAPI.devtools.network.onNavigated.addListener((url) => {
+            currentPageUrl = url;
+            console.log('[rep+] Navigation detected:', url);
+        });
+    }
 
+    console.log('[rep+] Adding onRequestFinished listener...');
     browserAPI.devtools.network.onRequestFinished.addListener((request) => {
+        console.log('[rep+] Request captured:', request.request.url);
         // Filter out data URLs or extension schemes
         if (!request.request.url.startsWith('http')) return;
 
@@ -96,22 +116,63 @@ export function setupNetworkListener(onRequestCaptured) {
         request.pageUrl = pageUrl;
 
         // Fetch response content so we can show it without switching tabs
-        request.getContent((body, encoding) => {
-            const responseStatus = request.response?.status || request.response?.statusCode || '';
-            const responseStatusText = request.response?.statusText || '';
-            const responseHeaders = request.response?.headers || [];
+        // Firefox uses promises for getContent(), Chrome uses callbacks
+        const getContentPromise = request.getContent();
+        
+        if (getContentPromise && typeof getContentPromise.then === 'function') {
+            // Firefox: Promise-based API
+            getContentPromise.then(([body, encoding]) => {
+                const responseStatus = request.response?.status || request.response?.statusCode || '';
+                const responseStatusText = request.response?.statusText || '';
+                const responseHeaders = request.response?.headers || [];
 
-            const enhancedRequest = {
-                ...request,
-                responseBody: body || '',
-                responseEncoding: encoding || '',
-                responseStatus,
-                responseStatusText,
-                responseHeaders
-            };
+                const enhancedRequest = {
+                    ...request,
+                    responseBody: body || '',
+                    responseEncoding: encoding || '',
+                    responseStatus,
+                    responseStatusText,
+                    responseHeaders
+                };
 
-            onRequestCaptured(enhancedRequest);
-        });
+                onRequestCaptured(enhancedRequest);
+            }).catch((error) => {
+                console.error('Error getting request content:', error);
+                // Still capture the request even if content fetch fails
+                const responseStatus = request.response?.status || request.response?.statusCode || '';
+                const responseStatusText = request.response?.statusText || '';
+                const responseHeaders = request.response?.headers || [];
+
+                const enhancedRequest = {
+                    ...request,
+                    responseBody: '',
+                    responseEncoding: '',
+                    responseStatus,
+                    responseStatusText,
+                    responseHeaders
+                };
+
+                onRequestCaptured(enhancedRequest);
+            });
+        } else {
+            // Chrome: Callback-based API (fallback)
+            request.getContent((body, encoding) => {
+                const responseStatus = request.response?.status || request.response?.statusCode || '';
+                const responseStatusText = request.response?.statusText || '';
+                const responseHeaders = request.response?.headers || [];
+
+                const enhancedRequest = {
+                    ...request,
+                    responseBody: body || '',
+                    responseEncoding: encoding || '',
+                    responseStatus,
+                    responseStatusText,
+                    responseHeaders
+                };
+
+                onRequestCaptured(enhancedRequest);
+            });
+        }
     });
 }
 
