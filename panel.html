@@ -10,9 +10,25 @@
     <!-- Highlight.js for syntax highlighting -->
     <link rel="stylesheet" href="css/github-dark.min.css" id="hljs-style">
     <script src="lib/highlight.min.js"></script>
+    <script>
+        // Immediate test to verify scripts load
+        console.log('[rep+] panel.html script executed!');
+        window.repPlusPanelLoaded = true;
+    </script>
 </head>
 
 <body>
+    <script>
+        // Immediate alert to test if panel loads
+        console.log('[rep+] BODY SCRIPT EXECUTED - Panel HTML loaded!');
+        if (typeof browser !== 'undefined') {
+            console.log('[rep+] browser object:', browser);
+        } else if (typeof chrome !== 'undefined') {
+            console.log('[rep+] chrome object:', chrome);
+        } else {
+            console.error('[rep+] ERROR: No browser/chrome object found!');
+        }
+    </script>
     <!-- Promotional Banner -->
     <div id="promo-banner" class="promo-banner">
         <div class="promo-content">

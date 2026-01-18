@@ -2,6 +2,10 @@
 // Use browser namespace for Firefox WebExtension standard
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
+console.log('[rep+] capture.js SCRIPT LOADED!');
+console.log('[rep+] browserAPI:', browserAPI);
+console.log('[rep+] browserAPI.devtools:', browserAPI.devtools);
+
 export function setupNetworkListener(onRequestCaptured) {
     console.log('[rep+] Setting up network listener...');
     

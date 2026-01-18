@@ -2,27 +2,39 @@
 // Fallback to chrome namespace for compatibility
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
-console.log('[rep+] DevTools script loaded, creating panel...');
+console.log('[rep+] ===== DevTools script (devtools.js) LOADED =====');
+console.log('[rep+] browserAPI:', typeof browserAPI !== 'undefined' ? browserAPI : 'UNDEFINED');
+console.log('[rep+] browserAPI.devtools:', browserAPI?.devtools);
 
 // Check if devtools API is available
 if (!browserAPI.devtools || !browserAPI.devtools.panels) {
     console.error('[rep+] ERROR: browser.devtools.panels API is not available!');
+    console.error('[rep+] Available APIs:', Object.keys(browserAPI || {}));
 } else {
+    console.log('[rep+] Creating Rep+ panel...');
     browserAPI.devtools.panels.create(
         "Rep+",
         "icons/icon16.png",
         "panel.html",
         function (panel) {
-            console.log("[rep+] Rep+ panel created in Firefox DevTools");
+            if (chrome.runtime.lastError) {
+                console.error("[rep+] ERROR creating panel:", chrome.runtime.lastError.message);
+                return;
+            }
+            console.log("[rep+] ✓ Rep+ panel created successfully in Firefox DevTools");
             
             // Log when panel is shown (helps debug)
-            panel.onShown.addListener(function(window) {
-                console.log("[rep+] Panel shown");
-            });
+            if (panel.onShown) {
+                panel.onShown.addListener(function(window) {
+                    console.log("[rep+] ✓ Panel shown (visible to user)");
+                });
+            }
             
-            panel.onHidden.addListener(function() {
-                console.log("[rep+] Panel hidden");
-            });
+            if (panel.onHidden) {
+                panel.onHidden.addListener(function() {
+                    console.log("[rep+] Panel hidden");
+                });
+            }
         }
     );
 }

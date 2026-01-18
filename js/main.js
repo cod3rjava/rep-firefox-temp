@@ -1,4 +1,6 @@
 // Main Entry Point
+console.log('[rep+] main.js SCRIPT LOADED!');
+
 import { state, actions } from './core/state.js';
 import { events, EVENT_NAMES } from './core/events.js';
 import {
